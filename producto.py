@@ -1,5 +1,5 @@
 class Producto:
-    def __init__(self,name,price,stock):
+    def __init__(self,id_producto,name,price,stock):
         if price<0:
             raise ValueError ("El precio no puede ser negativo")
         if stock <0:
@@ -7,6 +7,7 @@ class Producto:
         self.name=name
         self.price=price
         self.stock=stock
+        self.id_producto=id_producto
 
     def set_price(self, new_price):
         if new_price <0:
@@ -27,10 +28,10 @@ class Producto:
 #        }
 
     def __str__(self):
-        return f"Nombre:{self.name}-Precio:{self.price} ({self.stock} existe en stock)"
+        return f"id:{self.id_producto}-Nombre:{self.name}-Precio:{self.price} ({self.stock} existe en stock)"
 
-cartuchera=Producto("cartuchera",50000,20)
-carpeta=Producto("carpeta",70000,10)
+cartuchera=Producto(1,"cartuchera",50000,10)
+carpeta=Producto(2,"carpeta",70000,10)
 
 inventario=[cartuchera,carpeta]
 
