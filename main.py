@@ -1,2 +1,3 @@
 from product import Product
 from product_repository import ProductRepository
+from venta_detalle
