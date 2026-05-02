@@ -1,33 +1,25 @@
 from datetime import datetime
-class Venta:
-    def __init__(self,id_venta,nombre_producto,total,fecha=None):
-        if total <0:
-            raise ValueError("El total no puede ser negativo")
+from product import Product
+from item import Item
+class Sell:
+    def __init__(self):
         
-        self.id_venta=id_venta
-        self.nombre_producto=nombre_producto
-        self.total=total
-        self.fecha= fecha if fecha else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.date= dt.datetime.now().isoformat()
+        self._item=[]
 
     @property
     def total(self):
-        return self.total
-
+        new_total=0
+        for item in self._items:
+            new_total+=item.subtotal
+        return new_total
     @property
-    def calcular(self):
-        for item  in self.items:
-            self.total 
-        return
+    def add_items(self,product: Product,quantity):
+        self._items.append(Item(product,quantity))
+        
 
-    
-
-
-
-
-    def __str__(self):
-        return f"id:{self.id_venta}-Nombre:{self.nombre_producto} - Total ${self.total} - Fecha {self.fecha}"
-
-
-venta1=Venta(1,"cartuchera",10)
-
-print(venta1)
+    def to_dic(self):
+        return{
+            "total":self.total,
+            "date":self._date
+        }
