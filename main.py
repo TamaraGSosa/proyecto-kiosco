@@ -116,7 +116,7 @@ while True:
         print("\n========================================")
         print("          REGISTRAR VENTA")
         print("========================================")
-        print("Ingrese 0 para finalizar la venta.")
+        
 
         sell = Sell()
 
@@ -138,7 +138,7 @@ while True:
             try:
 
                 product_id = int(
-                    input("\nIngrese ID del producto: ")
+                    input("\nIngrese ID del producto o presione 0 para salir: ")
                 )
 
                 if product_id == 0:
@@ -161,9 +161,9 @@ while True:
 
                 print(" Producto agregado a la venta.")
 
-            except ValueError as e:
+            except ValueError:
 
-                print(f"Error: {e}")
+                print("Error: Debe ingresar un número válido.")
 
         if not sell.items:
 
