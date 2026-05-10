@@ -9,8 +9,19 @@ class Item:
         
         self.product = product
         self.quantity = quantity
-        self.unit_price = product.price
-        self.subtotal = self.unit_price * quantity
 
+    @property
+    def quantity(self):
+        return self._quantity
+    
+    
+    @quantity.setter
+    def quantity(self, new_quantity):
+        self._quantity = new_quantity
+        
     def __str__(self):
         return f"Producto: {self.product.name}, Cantidad: {self.quantity}, Subtotal: {self.subtotal}"
+    
+    @property
+    def subtotal(self):
+        return self.product.price * self.quantity
