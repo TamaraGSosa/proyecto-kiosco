@@ -1,4 +1,9 @@
 # Proyecto Kiosco
+Integrandes del Grupo: 
+Sosa Gabriela Tamara
+Diaz Facundo
+Quiroga Gabriel
+Rojas Cesar
 
 Este es el repositorio del proyecto de kiosco.
 # flujo git
