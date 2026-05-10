@@ -4,8 +4,8 @@ from item import Item
 
 class Sell:
     def __init__(self):
-        self.date = datetime.now().isoformat()   
-        self._items = []                         
+        self.date = datetime.now().isoformat()
+        self._items = []
 
     @property
     def total(self):
