@@ -1,5 +1,5 @@
 class Product:
-    # Se agrega id_producto=None para que el ID sea opcional
+
     def __init__(self, name, price, stock, id_producto=None):
         self.id_producto = id_producto 
         self.name = name
@@ -38,7 +38,8 @@ class Product:
 
     def to_dict(self):
         return {
-            "name": self.name,
-            "price": self.price,
+            "id_producto": self.id_producto,    
+            "nombre": self.name,
+            "precio": self.price,
             "stock": self.stock
         }

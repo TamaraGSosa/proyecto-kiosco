@@ -3,7 +3,8 @@ from product import Product
 from item import Item
 
 class Sell:
-    def __init__(self):
+    def __init__(self , sell_id=None):
+        self.sell_id = sell_id
         self.date = datetime.now().isoformat()
         self._items = []
 
@@ -14,11 +15,15 @@ class Sell:
             new_total += item.subtotal
         return new_total
 
+    @property
+    def items(self):
+        return self._items
+    
     def add_item(self, product: Product, quantity: int):
         self._items.append(Item(product, quantity))
 
     def to_dict(self):
         return {
             "total": self.total,
-            "date": self.date
+            "fecha": self.date
         }

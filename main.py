@@ -1,95 +1,296 @@
 # proyecto Kiosco
+
+from datetime import datetime
+
+from product import Product
+from product_repository import ProductRepository
+
+from sell import Sell
+from sell_repository import SellRepository
+
+from sell_item_repository import SellItemRepository
+
+
+product_repo = ProductRepository()
+sale_repo = SellRepository()
+sell_item_repo = SellItemRepository()
+
+
+def format_price(price):
+    return f"${price:,.0f}".replace(",", ".")
+
+
 def menu():
-    print("\n--- MENÚ PRINCIPAL ---")
-    print("1. Agregar producto")
-    print("2. Mostrar inventario")
-    print("3. Eliminar producto")
-    print("4. Registrar venta")
-    print("5. Ver ventas")
-    print("6. Salir")
 
-def pedir_id():
-    while True:
+    print("\n========================================")
+    print("           CAJA KIOSCO")
+    print("========================================")
+    print("1. Listar productos")
+    print("2. Agregar producto")
+    print("3. Registrar venta")
+    print("4. Reporte del día")
+    print("5. Salir")
+    print("========================================")
+
+
+while True:
+
+    menu()
+
+    option = input("Selecciona una opción: ")
+
+    # ========================================
+    # LISTAR PRODUCTOS
+    # ========================================
+
+    if option == "1":
+
+        products = product_repo.get_all_products()
+
+        print("\n========================================")
+        print("         LISTA DE PRODUCTOS")
+        print("========================================")
+
+        if not products:
+            print("No hay productos cargados.")
+            continue
+
+        for product in products:
+
+            print(
+                f"ID: {product.id_producto:<3}"
+                f" | {product.name:<15}"
+                f" | Precio: {format_price(product.price):<12}"
+                f" | Stock: {product.stock}"
+            )
+
+    # ========================================
+    # AGREGAR PRODUCTO
+    # ========================================
+
+    elif option == "2":
+
         try:
-            id_producto = int(input("Ingrese ID del producto (0 para finalizar): "))
-            return id_producto
-        except ValueError:
-            print("x ID inválido. Ingrese un número.")
 
-def agregar_producto(inventario, contador_id):
-    nombre = input("Nombre del producto: ")
-    precio = float(input("Precio: "))
-    cantidad = int(input("Cantidad: "))
-    inventario[contador_id] = {"nombre": nombre, "precio": precio, "cantidad": cantidad}
-    print(f"x Producto '{nombre}' agregado con ID {contador_id}.")
-    return contador_id + 1
+            print("\n========================================")
+            print("          AGREGAR PRODUCTO")
+            print("========================================")
 
-def mostrar_inventario(inventario):
-    print("\n--- INVENTARIO ---")
-    if not inventario:
-        print("Inventario vacío.")
+            name = input("Nombre del producto: ")
+
+            price = float(
+                input("Precio: ")
+            )
+
+            stock = int(
+                input("Stock: ")
+            )
+
+            product = Product(
+                name=name,
+                price=price,
+                stock=stock
+            )
+
+            product_repo.add_product(product)
+
+            print("\n Producto agregado correctamente.")
+
+            print(
+                f"ID: {product.id_producto} | "
+                f"{product.name} | "
+                f"{format_price(product.price)} | "
+                f"Stock: {product.stock}"
+            )
+
+        except ValueError as e:
+
+            print(f"\n Error: {e}")
+
+    # ========================================
+    # REGISTRAR VENTA
+    # ========================================
+
+    elif option == "3":
+
+        print("\n========================================")
+        print("          REGISTRAR VENTA")
+        print("========================================")
+        print("Ingrese 0 para finalizar la venta.")
+
+        sell = Sell()
+
+        products = product_repo.get_all_products()
+
+        print("\n--- PRODUCTOS DISPONIBLES ---")
+
+        for product in products:
+
+            print(
+                f"ID: {product.id_producto:<3}"
+                f" | {product.name:<15}"
+                f" | Precio: {format_price(product.price):<12}"
+                f" | Stock: {product.stock}"
+            )
+
+        while True:
+
+            try:
+
+                product_id = int(
+                    input("\nIngrese ID del producto: ")
+                )
+
+                if product_id == 0:
+                    break
+
+                product = product_repo.get_id_product(
+                    product_id
+                )
+
+                if product is None:
+
+                    print(" Producto no encontrado.")
+                    continue
+
+                quantity = int(
+                    input("Cantidad: ")
+                )
+
+                sell.add_item(product, quantity)
+
+                print(" Producto agregado a la venta.")
+
+            except ValueError as e:
+
+                print(f"Error: {e}")
+
+        if not sell.items:
+
+            print("\n No se agregaron productos.")
+            continue
+
+        sale_repo.add_sale(sell)
+
+        for item in sell.items:
+
+            sell_item_repo.add_sell_item(
+                item,
+                sell.sell_id
+            )
+
+        print("\n========================================")
+        print(
+            f"VENTA #{sell.sell_id} - "
+            f"{sell.date.replace('T', ' ')[:16]}"
+        )
+        print("========================================")
+
+        for item in sell.items:
+
+            print(
+                f"{item.product.name:<15}"
+                f"x{item.quantity:<3}"
+                f"{format_price(item.subtotal)}"
+            )
+
+            new_stock = (
+                item.product.stock - item.quantity
+            )
+
+            product_repo.update_stock(
+                item.product.id_producto,
+                new_stock
+            )
+
+        print("----------------------------------------")
+        print(f"TOTAL: {format_price(sell.total)}")
+        print("========================================")
+
+    # ========================================
+    # REPORTE DEL DÍA
+    # ========================================
+
+    elif option == "4":
+
+        print("\n========================================")
+
+        print(
+            f"REPORTE DE CAJA — "
+            f"{datetime.now().strftime('%Y-%m-%d')}"
+        )
+
+        print("========================================")
+
+        sales = sale_repo.sales_of_day()
+
+        if not sales:
+
+            print("No hay ventas registradas hoy.")
+            continue
+
+        for row in sales:
+
+            sale_id = row[0]
+            date = row[1]
+            sale_total = row[2]
+
+            formatted_hour = (
+                date.replace("T", " ")[11:16]
+            )
+
+            print(
+                f"\nVenta #{sale_id} — "
+                f"{formatted_hour}"
+            )
+
+            items = sell_item_repo.get_by_sell(
+                sale_id
+            )
+
+            for item in items:
+
+                print(
+                    f"{item.product.name:<15}"
+                    f"x{item.quantity:<3}"
+                    f"{format_price(item.subtotal)}"
+                )
+
+            print(
+                f"Subtotal: "
+                f"{format_price(sale_total)}"
+            )
+
+        print("----------------------------------------")
+
+        print(
+            f"Total de ventas: {len(sales)}"
+        )
+
+        print(
+            f"TOTAL RECAUDADO: "
+            f"{format_price(sale_repo.total_revenue_today())}"
+        )
+
+        print("========================================")
+
+    # ========================================
+    # SALIR
+    # ========================================
+
+    elif option == "5":
+
+        print("\n========================================")
+        print("   Saliendo del sistema...")
+        print("========================================")
+
+        break
+
+    # ========================================
+    # OPCIÓN INVÁLIDA
+    # ========================================
+
     else:
-        for id_producto, datos in inventario.items():
-            print(f"ID: {id_producto} | {datos['nombre']} - Precio: {datos['precio']} - Cantidad: {datos['cantidad']}")
 
-def eliminar_producto(inventario):
-    id_producto = pedir_id()
-    if id_producto == 0:
-        return
-    if id_producto in inventario:
-        eliminado = inventario[id_producto]["nombre"]
-        del inventario[id_producto]
-        print(f"x Producto '{eliminado}' eliminado.")
-    else:
-        print("x ID no encontrado en inventario.")
-
-def registrar_venta(inventario, ventas):
-    while True:
-        id_producto = pedir_id()
-        if id_producto == 0:
-            break
-        if id_producto in inventario:
-            cantidad = int(input("Cantidad vendida: "))
-            if cantidad <= inventario[id_producto]["cantidad"]:
-                inventario[id_producto]["cantidad"] -= cantidad
-                total = cantidad * inventario[id_producto]["precio"]
-                ventas.append({"producto": inventario[id_producto]["nombre"], "cantidad": cantidad, "total": total})
-                print(f"x Venta registrada: {cantidad} x {inventario[id_producto]['nombre']} = ${total}")
-            else:
-                print("x Stock insuficiente.")
-        else:
-            print("x ID no encontrado en inventario.")
-
-def ver_ventas(ventas):
-    print("\n--- VENTAS ---")
-    if ventas:
-        for venta in ventas:
-            print(f"Producto: {venta['producto']} - Cantidad: {venta['cantidad']} - Total: ${venta['total']}")
-    else:
-        print("No hay ventas registradas.")
-
-def main():
-    inventario = {}
-    ventas = []
-    contador_id = 1  
-    while True:
-        menu()
-        opcion = input("Selecciona una opción: ")
-        if opcion == "1":
-            contador_id = agregar_producto(inventario, contador_id)
-        elif opcion == "2":
-            mostrar_inventario(inventario)
-        elif opcion == "3":
-            eliminar_producto(inventario)
-        elif opcion == "4":
-            registrar_venta(inventario, ventas)
-        elif opcion == "5":
-            ver_ventas(ventas)
-        elif opcion == "6":
-            print("👋 Saliendo del sistema...")
-            break
-        else:
-            print("x Opción inválida.")
-
-if __name__ == "__main__":
-    main()
+        print("\n Opción inválida.")
+        print("Seleccione una opción del 1 al 5.")
